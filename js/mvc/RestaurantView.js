@@ -158,13 +158,12 @@ class RestaurantView {
 		const botones = document.querySelectorAll('button.btn.btn-primary');
 		for (const boton of botones) {
 			boton.addEventListener('click', (event) => {
-
+				let dish = event.target.dataset.dname;
 				if (!this.dishWindows || this.dishWindows.closed) {
 					this.dishWindows = window.open('dish.html', 'DishWindow',
 						'width=800, height=600, top=250, left=250, titlebar=yes, toolbar=no,menubar=no, location=no');
-						
+
 					this.dishWindows.addEventListener('DOMContentLoaded', () => {
-						let dish = event.target.dataset.dname;
 						this[EXCECUTE_HANDLER](
 							handler,
 							[dish],
@@ -176,11 +175,33 @@ class RestaurantView {
 
 					});
 				} else {
-					handler(event.target.dataset.dname);
+					this[EXCECUTE_HANDLER](
+						handler,
+						[dish],
+						'#listado',
+						{ action: 'showDishInNewWindow', dish },
+						'#' + dish,
+						event,
+					);
 					this.dishWindows.focus();
 				}
 			});
 		}
+	}
+
+	bindCloseWindows(handler) {
+		
+		const bClose = document.getElementById('windowsCloser');
+		bClose.addEventListener('click', (event) => {
+			this[EXCECUTE_HANDLER](
+				handler,
+				[],
+				'.header',
+				{ action: 'closeWindows' },
+				'#',
+				event,
+			);
+		});
 	}
 
 
@@ -382,6 +403,12 @@ class RestaurantView {
 			${maps}
 			</div>`);
 		this.list.append(container);
+	}
+
+	closeWindows() {
+		if (this.dishWindows !== null) {
+			this.dishWindows.window.close();
+		}
 	}
 
 }

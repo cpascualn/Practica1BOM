@@ -35,6 +35,9 @@ const historyActions = {
     showDishInNewWindow: (state) => {
         RestaurantApp.handleShowDishInNewWindow(state.dish);
     },
+    closeWindows: () => {
+        RestaurantApp.handleCloseWindows();
+    },
 };
 
 window.addEventListener('popstate', (event) => {
