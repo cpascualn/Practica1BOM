@@ -1,4 +1,6 @@
+const EXCECUTE_HANDLER = Symbol('excecuteHandler');
 class RestaurantView {
+
 	constructor() {
 		this.categories = document.getElementById('categories');
 		this.list = document.getElementById('listado');
@@ -6,15 +8,27 @@ class RestaurantView {
 		this.menus = document.getElementById('menus');
 		this.headText = document.getElementById("head_text");
 		this.restaurants = document.getElementById("restaurants");
+
+	}
+
+	[EXCECUTE_HANDLER](handler, handlerArguments, scrollElement, data, url,
+		event) {
+		handler(...handlerArguments);
+		const scroll = document.querySelector(scrollElement);
+		if (scroll) scroll.scrollIntoView();
+		//$(scrollElement).get(0).scrollIntoView();
+		history.pushState(data, null, url);
+		event.preventDefault();
 	}
 
 
 	bindInit(handler) { // enlazar el manejador de los botones de inicio con los botones en el html
 		document.getElementById('init').addEventListener('click', (event) => {
-			handler();
+			this[EXCECUTE_HANDLER](handler, [], 'body', { action: 'init' }, '#', event);
 		});
 		document.getElementById('logo').addEventListener('click', (event) => {
-			handler();
+			this[EXCECUTE_HANDLER](handler, [], 'body', { action: 'init' }, '#', event);
+
 		});
 	}
 
@@ -23,16 +37,30 @@ class RestaurantView {
 		const links = categoryList.querySelectorAll('div');
 		for (const link of links) {
 			let enlace = link.querySelector("a");
-			enlace.addEventListener('click', () => {
-				handler(enlace.dataset.category);
-				this.modifyBreadcrumb(enlace.dataset.category);
+			const category = enlace.dataset.category;
+			enlace.addEventListener('click', (event) => {
+				this[EXCECUTE_HANDLER](
+					handler,
+					[category],
+					'#listado',
+					{ action: 'showCategoryDishes', category },
+					'#' + category,
+					event,
+				);
 			});
 		}
 	}
 
 	bindAllerList(handler) { // enlazar el manejador del  boton alergenos del menu
 		this.allergens.addEventListener('click', (event) => {
-			handler();
+			this[EXCECUTE_HANDLER](
+				handler,
+				[],
+				'#categories',
+				{ action: 'showAllerList' },
+				'#alergenos',
+				event,
+			);
 		});
 
 	}
@@ -42,16 +70,30 @@ class RestaurantView {
 		const links = allergenList.querySelectorAll('div');
 		for (const link of links) {
 			let enlace = link.querySelector("a");
-			enlace.addEventListener('click', () => {
-				handler(enlace.dataset.allergen);
-				this.modifyBreadcrumb(enlace.dataset.allergen);
+			const allergen = enlace.dataset.allergen;
+			enlace.addEventListener('click', (event) => {
+				this[EXCECUTE_HANDLER](
+					handler,
+					[allergen],
+					'#listado',
+					{ action: 'showAllerDishes', allergen },
+					'#' + allergen,
+					event,
+				);
 			});
 		}
 	}
 
 	bindMenuList(handler) {// enlazar el manejador del  boton menus del menu
 		this.menus.addEventListener('click', (event) => {
-			handler();
+			this[EXCECUTE_HANDLER](
+				handler,
+				[],
+				'#categories',
+				{ action: 'showMenuList' },
+				'#menus',
+				event,
+			);
 		});
 
 	}
@@ -61,9 +103,16 @@ class RestaurantView {
 		const links = menuList.querySelectorAll('div');
 		for (const link of links) {
 			let enlace = link.querySelector("a");
-			enlace.addEventListener('click', () => {
-				handler(enlace.dataset.menu);
-				this.modifyBreadcrumb(enlace.dataset.menu);
+			const menu = enlace.dataset.menu;
+			enlace.addEventListener('click', (event) => {
+				this[EXCECUTE_HANDLER](
+					handler,
+					[menu],
+					'#listado',
+					{ action: 'showMenuDishes', menu },
+					'#' + menu,
+					event,
+				);
 			});
 		}
 	}
@@ -72,8 +121,16 @@ class RestaurantView {
 		const links = this.restaurants.querySelectorAll('li');
 		for (const link of links) {
 			let enlace = link.querySelector("a");
-			enlace.addEventListener('click', () => {
-				handler(enlace.dataset.restaurant);
+			const restaurant = enlace.dataset.restaurant;
+			enlace.addEventListener('click', (event) => {
+				this[EXCECUTE_HANDLER](
+					handler,
+					[restaurant],
+					'#listado',
+					{ action: 'showRestaurant', restaurant },
+					'#' + restaurant,
+					event,
+				);
 			});
 		}
 	}
@@ -151,6 +208,7 @@ class RestaurantView {
 					<img src="${dish.image}" alt="">
 					<h5>${dish.description}</h5>
 					<p><b>INGREDIENTES:</b> ${dish.ingredients}</p>
+					<button id="b-open" data-serial="2" class="btn btn-primary text-uppercase mr-2 px-4">Abrir en nueva ventana</button>
 				  </div>
 				  <div class="modal-footer">
 					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -226,7 +284,7 @@ class RestaurantView {
 
 	showRestaurant(restaurant) { // mostrar la ficha del restaurante
 		this.headText.innerHTML = restaurant.name;
-		this.modifyBreadcrumb(restaurant.name);
+
 		this.categories.innerHTML = '';
 		this.list.innerHTML = '';
 

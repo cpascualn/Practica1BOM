@@ -7,5 +7,36 @@ const RestaurantApp = new RestaurantController(
     RestaurantsManager.getInstance(),
     new RestaurantView());
 
+const historyActions = {
+    init: () => {
+        RestaurantApp.handleInit();
+    },
+    showCategoryDishes: (state) => {
+        RestaurantApp.handleCategoryList(state.category);
+    },
+    showAllerList: () => {
+        RestaurantApp.handleAllergenList();
+    },
+    showMenuList: () => {
+        RestaurantApp.handleMenuList();
+    },
+    showMenuDishes: (state) => {
+        RestaurantApp.handleMenuDishes(state.menu);
+    },
+    showAllerDishes: (state) => {
+        RestaurantApp.handleAllergenDishes(state.allergen);
+    },
+    showRestaurant: (state) => {
+        RestaurantApp.handleRestaurants(state.restaurant);
+    },
+};
+
+window.addEventListener('popstate', (event) => {
+    if (event.state) {
+        historyActions[event.state.action](event.state);
+    }
+});
+
+history.replaceState({ action: 'init' }, null);
 
 export default RestaurantApp;
