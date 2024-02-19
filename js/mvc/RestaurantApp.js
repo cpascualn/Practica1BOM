@@ -29,6 +29,12 @@ const historyActions = {
     showRestaurant: (state) => {
         RestaurantApp.handleRestaurants(state.restaurant);
     },
+    showDish: (state) => {
+        RestaurantApp.handleShowDish(state.target);
+    },
+    showDishInNewWindow: (state) => {
+        RestaurantApp.handleShowDishInNewWindow(state.dish);
+    },
 };
 
 window.addEventListener('popstate', (event) => {
@@ -40,3 +46,7 @@ window.addEventListener('popstate', (event) => {
 history.replaceState({ action: 'init' }, null);
 
 export default RestaurantApp;
+
+
+
+

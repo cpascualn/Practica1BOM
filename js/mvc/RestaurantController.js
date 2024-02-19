@@ -10,19 +10,29 @@ class RestaurantController {
         this.onLoad();
         this.onInit();
         // Enlazamos handlers con la vista
-        this[VIEW].bindInit(this.handleInit);
-        this[VIEW].bindAllerList(this.handleAllergenList);
-        this[VIEW].bindMenuList(this.handleMenuList);
-        this[VIEW].bindRestaurant(this.handleRestaurants);
+        try {
+            this[VIEW].bindInit(this.handleInit);
+            this[VIEW].bindAllerList(this.handleAllergenList);
+            this[VIEW].bindMenuList(this.handleMenuList);
+            this[VIEW].bindRestaurant(this.handleRestaurants);
+            this[VIEW].bindOpenModal(this.handleOpenModal);
+            this[VIEW].bindShowDish(this.handleShowDish);
+            this[VIEW].bindCloseWindows(this.handleShowDish);
+        } catch (error) {
+
+        }
     }
 
-
-
     onInit = () => { // cada vez que se pulsa el boton de inicio se muestran de nuevo las categorias , 3 platos rand y se reinicia el breadcrumb
-        this[VIEW].showCategories(this[MODEL].categories);
-        this[VIEW].showDishes(this.RandDishes());
-        this[VIEW].bindCategoryList(this.handleCategoryList);
-        this[VIEW].modifyBreadcrumb(null);
+        try {
+            this[VIEW].showCategories(this[MODEL].categories);
+            this[VIEW].showDishes(this.RandDishes());
+            this[VIEW].bindCategoryList(this.handleCategoryList);
+            this[VIEW].modifyBreadcrumb(null);
+            this[VIEW].bindShowDish(this.handleShowDish);
+        } catch (error) {
+
+        }
     };
 
     handleInit = () => { // cuando se pulsa inicio se llama a oninit
@@ -77,9 +87,13 @@ class RestaurantController {
 
 
         // mostrar el menu de categorias , 3 platos aleatorios y cargar el desplegable con los restaurantes
-        this[VIEW].showCategories(this[MODEL].categories);
-        this[VIEW].showDishes(this.RandDishes());
-        this[VIEW].loadRestaurants(this[MODEL].restaurants);
+        try {
+            this[VIEW].showCategories(this[MODEL].categories);
+            this[VIEW].showDishes(this.RandDishes());
+            this[VIEW].loadRestaurants(this[MODEL].restaurants);
+        } catch (error) {
+
+        }
     };
 
     RandDishes() {   // recoger los objetos dish en un array
@@ -106,12 +120,14 @@ class RestaurantController {
         this[VIEW].modifyBreadcrumb(catName);
         this[VIEW].showCategories(this[MODEL].categories);
         this[VIEW].bindCategoryList(this.handleCategoryList);
+        this[VIEW].bindShowDish(this.handleShowDish);
     }
 
     handleAllergenList = () => {// manejar cuando se pulsa  alergenos en el menu para mostrar un nuevo menu con los alergenos disponibles
         this[VIEW].showAllergens(this[MODEL].allergens);
         this[VIEW].bindAllergen(this.handleAllergenDishes);
         this[VIEW].modifyBreadcrumb(null);
+        this[VIEW].bindShowDish(this.handleShowDish);
     }
 
     handleAllergenDishes = (allergenName) => { // manejar cuando se pulsa un alergeno del nuevo menu de alergenos generado  y mostrar sus platos
@@ -119,6 +135,7 @@ class RestaurantController {
         let dishs = [...this[MODEL].getDishesWithAllergen(allergen)].map(dish => dish.dish);
         this[VIEW].showDishes(dishs);
         this[VIEW].modifyBreadcrumb(allergenName);
+        this[VIEW].bindShowDish(this.handleShowDish);
     }
 
 
@@ -135,6 +152,7 @@ class RestaurantController {
         let dishs = menu.dishes.map(dish => dish.dish);
         this[VIEW].showDishes(dishs);
         this[VIEW].modifyBreadcrumb(menuName);
+        this[VIEW].bindShowDish(this.handleShowDish);
     }
 
     handleRestaurants = (restName) => { // mostrar restaurante pulsado en el menu
@@ -143,6 +161,21 @@ class RestaurantController {
         this[VIEW].modifyBreadcrumb(restName);
     }
 
-}
+    handleShowDish = (dishName) => {
+        // cuando muestras un plato, asignar enlace al boton nueva ventana
+        this[VIEW].bindShowDishInNewWindow(this.handleShowDishInNewWindow);
+        console.log("mostrar plato " + dishName);
+    }
 
+    handleShowDishInNewWindow = (dishName) => {
+        try {
+            const dish = [...this[MODEL].dishes].find(d => d.dish.name.replace(/\s/g, '') === dishName);
+            // if (dish === undefined) throw new Error();
+            this[VIEW].showDishInNewWindow(dish.dish, "no existe");
+        } catch (error) {
+            this[VIEW].showDishInNewWindow(null, 'No existe este producto en la página.');
+        }
+    }
+
+}
 export default RestaurantController;

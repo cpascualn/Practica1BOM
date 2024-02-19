@@ -8,7 +8,7 @@ class RestaurantView {
 		this.menus = document.getElementById('menus');
 		this.headText = document.getElementById("head_text");
 		this.restaurants = document.getElementById("restaurants");
-
+		this.dishWindows = null;
 	}
 
 	[EXCECUTE_HANDLER](handler, handlerArguments, scrollElement, data, url,
@@ -23,6 +23,7 @@ class RestaurantView {
 
 
 	bindInit(handler) { // enlazar el manejador de los botones de inicio con los botones en el html
+
 		document.getElementById('init').addEventListener('click', (event) => {
 			this[EXCECUTE_HANDLER](handler, [], 'body', { action: 'init' }, '#', event);
 		});
@@ -30,6 +31,24 @@ class RestaurantView {
 			this[EXCECUTE_HANDLER](handler, [], 'body', { action: 'init' }, '#', event);
 
 		});
+	}
+
+	bindShowDish(handler) {
+		const cards = document.querySelectorAll('div.card');
+		for (const card of cards) {
+			let boton = card.querySelector('button.btn')
+			let dish = boton.id;
+			boton.addEventListener('click', (event) => {
+				this[EXCECUTE_HANDLER](
+					handler,
+					[dish],
+					'#listado',
+					{ action: 'showDish', dish },
+					'#',
+					event,
+				);
+			});
+		}
 	}
 
 	bindCategoryList(handler) { // enlazar el manejador de los botones de las categorias con los botones en el html
@@ -135,6 +154,36 @@ class RestaurantView {
 		}
 	}
 
+	bindShowDishInNewWindow(handler) {
+		const botones = document.querySelectorAll('button.btn.btn-primary');
+		for (const boton of botones) {
+			boton.addEventListener('click', (event) => {
+
+				if (!this.dishWindows || this.dishWindows.closed) {
+					this.dishWindows = window.open('dish.html', 'DishWindow',
+						'width=800, height=600, top=250, left=250, titlebar=yes, toolbar=no,menubar=no, location=no');
+						
+					this.dishWindows.addEventListener('DOMContentLoaded', () => {
+						let dish = event.target.dataset.dname;
+						this[EXCECUTE_HANDLER](
+							handler,
+							[dish],
+							'#listado',
+							{ action: 'showDishInNewWindow', dish },
+							'#' + dish,
+							event,
+						);
+
+					});
+				} else {
+					handler(event.target.dataset.dname);
+					this.dishWindows.focus();
+				}
+			});
+		}
+	}
+
+
 	modifyBreadcrumb(category) { // metodo para modificar las migas de pan, si recibe null se borra y vuelve al inicio, si no se añade la nueva ubicacion
 		let bc = document.getElementById('breadcrumb');
 		// si ya tiene un hijo , se borra para reemplazarlo por el nuevo
@@ -181,7 +230,6 @@ class RestaurantView {
 			this.list.classList.remove('nav');
 
 
-
 		for (const dish of dishes) {
 			const container = document.createElement('div');
 			container.classList.add('card');
@@ -194,7 +242,7 @@ class RestaurantView {
 		    <h5 class="card-title"  > ${dish.name} </h5> 
 			</div>
 			</div>
-			<button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#Modal${name}"> SABER MÁS
+			<button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#Modal${name}" id="${name}"> SABER MÁS
   			</button>
 
 			  <div class="modal fade" id="Modal${name}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -208,19 +256,46 @@ class RestaurantView {
 					<img src="${dish.image}" alt="">
 					<h5>${dish.description}</h5>
 					<p><b>INGREDIENTES:</b> ${dish.ingredients}</p>
-					<button id="b-open" data-serial="2" class="btn btn-primary text-uppercase mr-2 px-4">Abrir en nueva ventana</button>
 				  </div>
 				  <div class="modal-footer">
+				  <button data-dname="${name}" class="btn btn-primary text-uppercase mr-2 px-4">Abrir en nueva ventana</button>
 					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 				  </div>
 				</div>
 			  </div>
 			</div>
-
 			 `);
 
 			this.list.append(container);
 		}
+	}
+
+
+	showDishInNewWindow(dish, message) {
+
+		const platosDiv = this.dishWindows.document.getElementById('plato');
+		const header = this.dishWindows.document.getElementById('h-title');
+		if (platosDiv !== null) {
+			platosDiv.replaceChildren();
+		}
+
+
+		if (dish !== null) {
+			header.innerHTML = dish.name;
+			this.dishWindows.document.title = `${dish.name}`;
+			platosDiv.insertAdjacentHTML('beforeend', `
+			<img src="${dish.image}" alt>
+			<h5>${dish.description}</h5>
+			<p><b>INGREDIENTES:</b> ${dish.ingredients}</p>
+			<button type="button" class="btn btn-secondary" id="b-close" onclick="window.close()">Close</button>
+			`);
+		} else {
+			if (platosDiv !== null) {
+				platosDiv.insertAdjacentHTML('beforeend', `<div class="row d-flex justify-content-center">${message}</div>`);
+			}
+
+		}
+		this.dishWindows.document.body.scrollIntoView();
 	}
 
 	showAllergens(allergens) { // mostrar el menu de alergenos
