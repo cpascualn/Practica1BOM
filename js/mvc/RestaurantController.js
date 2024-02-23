@@ -15,7 +15,6 @@ class RestaurantController {
             this[VIEW].bindAllerList(this.handleAllergenList);
             this[VIEW].bindMenuList(this.handleMenuList);
             this[VIEW].bindRestaurant(this.handleRestaurants);
-            this[VIEW].bindShowDish(this.handleShowDish);
             this[VIEW].bindCloseWindows(this.handleCloseWindows);
         } catch (error) {
             console.log(error);
